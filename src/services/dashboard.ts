@@ -14,8 +14,13 @@ export interface DashboardData {
 }
 
 export const dashboardService = {
-  getDashboardData: async (params?: { start_date?: string; end_date?: string }) => {
-    const response = await api.get<ApiResponse<DashboardData>>("/dashboard", { params });
+  getDashboardData: async (params?: {
+    start_date?: string;
+    end_date?: string;
+  }) => {
+    const response = await api.get<ApiResponse<DashboardData>>("/dashboard", {
+      params,
+    });
     return response.data.data;
   },
 };
