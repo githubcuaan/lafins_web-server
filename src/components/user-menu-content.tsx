@@ -5,12 +5,13 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { UserInfo } from "@/components/user-info";
-import { logout } from "@/routes";
 import { edit } from "@/routes/profile";
 import { type User } from "@/types";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, Settings } from "lucide-react";
 import { useMobileNavigation } from "@/hooks/useMobileNavigation";
+import { login } from "@/routes";
+import { useAuth } from "@/hooks/useAuth";
 
 interface UserMenuContentProps {
   user: User;
@@ -19,10 +20,17 @@ interface UserMenuContentProps {
 export function UserMenuContent({ user }: UserMenuContentProps) {
   const cleanup = useMobileNavigation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
-    cleanup();
-    navigate(logout());
+    try {
+      await logout();
+    } catch (error) {
+      console.log("Logout err: ", error);
+    } finally {
+      cleanup();
+      navigate(login());
+    }
   };
 
   return (
