@@ -2,16 +2,28 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Login from "@/pages/auth/login";
 import Register from "@/pages/auth/register";
 import Dashboard from "@/pages/dashboard";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import Incomes from "@/pages/incomes";
+import Outcomes from "@/pages/outcomes";
+import Jarsconfig from "@/pages/jarconfigs";
+import Welcome from "@/pages/welcome";
+import ProfileSettings from "@/pages/settings/profile";
+import PasswordSettings from "@/pages/settings/password";
+import TwoFactorSettings from "@/pages/settings/two-factor";
+import AppearanceSettings from "@/pages/settings/appearance";
+import { createBrowserRouter } from "react-router-dom";
 
 export const router = createBrowserRouter([
   // public routes
+  {
+    path: "/",
+    element: <Welcome />,
+  },
   {
     path: "/login",
     element: <Login />,
   },
   {
-    path: "register",
+    path: "/register",
     element: <Register />,
   },
 
@@ -20,28 +32,36 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: "/",
-        element: <Navigate to="/dashboard" replace />,
-      },
-      {
         path: "/dashboard",
         element: <Dashboard />,
       },
       {
         path: "/incomes",
-        element: <div>Trang Incomes (Đang refactor...)</div>, // Placeholder
+        element: <Incomes />,
       },
       {
         path: "/outcomes",
-        element: <div>Trang Outcomes (Đang refactor...)</div>, // Placeholder
+        element: <Outcomes />,
       },
       {
         path: "/jars",
-        element: <div>Trang Jars (Đang refactor...)</div>, // Placeholder
+        element: <Jarsconfig />,
       },
       {
-        path: "/profile",
-        element: <div>Trang Profile (Đang refactor...)</div>, // Placeholder
+        path: "/settings/profile",
+        element: <ProfileSettings />,
+      },
+      {
+        path: "/settings/password",
+        element: <PasswordSettings />,
+      },
+      {
+        path: "/settings/two-factor",
+        element: <TwoFactorSettings />,
+      },
+      {
+        path: "/settings/appearance",
+        element: <AppearanceSettings />,
       },
     ],
   },

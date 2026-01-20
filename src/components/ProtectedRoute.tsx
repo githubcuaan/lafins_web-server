@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
 export const ProtectedRoute = () => {
   // 1. if is checking login -> spinner/ wating
@@ -19,4 +19,7 @@ export const ProtectedRoute = () => {
   if (!user) {
     return <Navigate to="/login" replace />;
   }
+
+  // 3. if user is logged in -> render protected routes
+  return <Outlet />;
 };
