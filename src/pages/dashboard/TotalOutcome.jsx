@@ -1,3 +1,5 @@
+import { TrendingUp } from 'lucide-react';
+
 export default function TotalOutcome({ className = 'w-full z-30', total = 0 }) {
 
     return (
@@ -5,7 +7,7 @@ export default function TotalOutcome({ className = 'w-full z-30', total = 0 }) {
             <div className="p-4 relative z-40">
                 <div className="flex items-center space-x-4">
                     <div className="circle-icon">
-                        <i className="fa-solid fa-arrow-up"></i>
+                        <TrendingUp className="w-6 h-6" />
                     </div>
                     <div>
                         <div className="text-sm text-muted-foreground">Outcome</div>

@@ -1,3 +1,5 @@
+import { TrendingDown } from 'lucide-react';
+
 export default function TotalIncome({ className = 'w-full', total = 0 }) {
 
     return (
@@ -5,7 +7,7 @@ export default function TotalIncome({ className = 'w-full', total = 0 }) {
             <div className="p-4 relative z-10">
                 <div className='flex items-center space-x-4'>
                     <div className='circle-icon'>
-                        <i className="fa-solid fa-arrow-down"></i>
+                        <TrendingDown className="w-6 h-6" />
                     </div>
 
                     <div>
