@@ -13,7 +13,7 @@ import SuccessDialog from "@/components/success-dialog";
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: "Jarsconfig",
-    href: "/jarsconfig",
+    href: "/jars",
   },
 ];
 
@@ -158,10 +158,10 @@ export default function Jarsconfig() {
           totalPercent={totalPercent}
         />
 
-        <JarList 
-          className="w-full" 
+        <JarList
+          className="w-full"
           jars={serverJars as Jar[]}
-          onPercentChange={handlePercentChange} 
+          onPercentChange={handlePercentChange}
         />
         <DeleteAllDataBox />
         <SuccessDialog
@@ -174,4 +174,3 @@ export default function Jarsconfig() {
     </AppLayout>
   );
 }
-
