@@ -158,7 +158,7 @@ export function IncomeOutcomeBar({ summary = {} }: IncomeOutcomeBarProps) {
 
   // Render Check
   const hasData = chartData.datasets.some((d) =>
-    d.data.some((v) => typeof v === "number" && v > 0),
+    d.data.some((v) => typeof v === "number" && v >= 0),
   );
 
   if (!hasData) {

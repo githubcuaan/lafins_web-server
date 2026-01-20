@@ -24,7 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Dashboard() {
   useDocumentTitle("Dashboard");
 
-  const { isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["dashboard"],
     queryFn: () => dashboardService.getDashboardData(),
   });
@@ -66,13 +66,13 @@ export default function Dashboard() {
         >
           <div className="grid auto-rows-auto gap-4 md:grid-cols-3 p-4">
             <div className="card-default">
-              <TotalBalance />
+              <TotalBalance total={data?.summary?.total_balance} />
             </div>
             <div className="card-default">
-              <TotalIncome />
+              <TotalIncome total={data?.summary?.total_income} />
             </div>
             <div className="card-default">
-              <TotalOutcome />
+              <TotalOutcome total={data?.summary?.total_outcome} />
             </div>
           </div>
         </div>
@@ -80,18 +80,18 @@ export default function Dashboard() {
         {/* chart: split into two columns (left: pie, right: income/outcome) */}
         <div
           id="chart"
-          className="relative overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-[40vh] dark:border-sidebar-border dark:border-gray-700 bg-white dark:bg-[#0a0a0a]"
+          className="relative overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-[40vh] dark:border-sidebar-border bg-white dark:bg-[#0a0a0a]"
         >
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full items-center">
               <div className="flex items-center justify-center">
                 <div className="w-full max-w-2xl">
-                  <JarDistributionPie />
+                  <JarDistributionPie jars={data?.jars} />
                 </div>
               </div>
               <div className="flex items-center justify-center">
                 <div className="w-full max-w-2x">
-                  <IncomeOutcomeBar />
+                  <IncomeOutcomeBar summary={data?.summary} />
                 </div>
               </div>
             </div>
@@ -101,10 +101,10 @@ export default function Dashboard() {
         {/* Jar list */}
         <div
           id="jarlist"
-          className="overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border dark:border-gray-700 bg-white dark:bg-[#0a0a0a]"
+          className="overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border bg-white dark:bg-[#0a0a0a]"
         >
           <div className="size-full overflow-auto p-4">
-            <JarList className={"w-full h-full"} />
+            <JarList className={"w-full h-full"} jars={data?.jars} />
           </div>
         </div>
       </main>

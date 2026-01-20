@@ -197,9 +197,7 @@ export function JarDistributionPie({ jars = [] }: JarDistributionPieProps) {
   if (!hasData) {
     return (
       <div className="w-full p-8 text-center border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-slate-900/50">
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          Chưa có dữ liệu phân bổ hũ
-        </span>
+        No data available.
       </div>
     );
   }
