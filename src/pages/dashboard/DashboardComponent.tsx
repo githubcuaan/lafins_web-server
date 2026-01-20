@@ -3,37 +3,18 @@
 // as named exports so other parts of the app can do:
 // import { TotalIncome, JarList } from './pages/dashboard/DashboardComponent'
 
-// @ts-ignore
-import TotalOutcome from './TotalOutcome';
-// @ts-ignore
-import TotalIncome from './TotalIncome';
-// @ts-ignore
-import TotalBalance from './TotalBalance';
-// @ts-ignore
-import JarList from './JarList';
-// @ts-ignore
-import JarDistributionPie from './JarDistributionPie';
-// @ts-ignore
-import IncomeOutcomeBar from './IncomeOutcomeBar';
-import FillterBox from '../../components/FilterBox';
+import { IncomeOutcomeBar } from "./IncomeOutcomeBar";
+import { JarDistributionPie } from "./JarDistributionPie";
+import { JarList } from "./JarList";
+import { TotalBalance } from "./TotalBalance";
+import { TotalIncome } from "./TotalIncome";
+import { TotalOutcome } from "./TotalOutcome";
 
 export {
-	TotalOutcome,
-	TotalIncome,
-	TotalBalance,
-	JarList,
-	JarDistributionPie,
-	IncomeOutcomeBar,
-	FillterBox
-};
-
-// Default grouped export (optional convenience)
-export default {
-	TotalOutcome,
-	TotalIncome,
-	TotalBalance,
-	JarList,
-	JarDistributionPie,
-	IncomeOutcomeBar,
-	FillterBox
+  IncomeOutcomeBar,
+  JarDistributionPie,
+  JarList,
+  TotalIncome,
+  TotalBalance,
+  TotalOutcome,
 };
