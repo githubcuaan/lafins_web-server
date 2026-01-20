@@ -1,39 +1,52 @@
 import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useQuery } from '@tanstack/react-query';
+import { dashboardService } from '@/services/dashboard';
 
 import {TotalBalance, TotalIncome, TotalOutcome, JarDistributionPie, IncomeOutcomeBar, JarList, FillterBox} from './dashboard/DashboardComponent';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard().url,
+        href: '/dashboard',
     },
 ];
 
 export default function Dashboard() {
-    const { props } = usePage();
+    useDocumentTitle('Dashboard');
+    
+    const { isLoading, error } = useQuery({
+        queryKey: ['dashboard'],
+        queryFn: () => dashboardService.getDashboardData(),
+    });
 
-    // Log controller-passed data to the browser console when navigating to Dashboard
-    useEffect(() => {
-        // Narrow log to relevant keys for readability, but also include full props
-        if (typeof console.groupCollapsed === 'function') {
-            console.groupCollapsed('Dashboard props');
-        }
-        console.log('full props:', props);
-        console.log('summary:', props.summary);
-        console.log('jars:', props.jars);
-        console.log('jar_meta:', props.jar_meta);
-        if (typeof console.groupEnd === 'function') {
-            console.groupEnd();
-        }
-    }, [props]);
+    if (isLoading) {
+        return (
+            <AppLayout breadcrumbs={breadcrumbs}>
+                <main className="flex flex-1 flex-col gap-4 overflow-auto rounded-xl p-4">
+                    <div className="flex items-center justify-center h-full">
+                        <p>Loading...</p>
+                    </div>
+                </main>
+            </AppLayout>
+        );
+    }
+
+    if (error) {
+        return (
+            <AppLayout breadcrumbs={breadcrumbs}>
+                <main className="flex flex-1 flex-col gap-4 overflow-auto rounded-xl p-4">
+                    <div className="flex items-center justify-center h-full">
+                        <p className="text-red-500">Error loading dashboard data</p>
+                    </div>
+                </main>
+            </AppLayout>
+        );
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
             <main className="flex flex-1 flex-col gap-4 overflow-auto rounded-xl p-4">
 
                 {/* fillter box */}

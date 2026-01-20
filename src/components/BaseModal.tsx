@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useForm } from '@inertiajs/react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
+import api from '@/services/api';
 
 type ModalType = 'add' | 'update';
 
@@ -50,7 +50,18 @@ export default function BaseModal({
     return acc;
   }, {} as Record<string, string>);
 
-  const { data, setData, post, put, processing, errors, reset } = useForm(initialFormData);
+  const [data, setDataState] = useState<Record<string, string>>(initialFormData);
+  const [processing, setProcessing] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const setData = (key: string, value: string) => {
+    setDataState(prev => ({ ...prev, [key]: value }));
+  };
+
+  const reset = () => {
+    setDataState(initialFormData);
+    setErrors({});
+  };
 
   // Update form when modal is open
   useEffect(() => {
@@ -81,34 +92,37 @@ export default function BaseModal({
   }
 
   // Handle submit
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setProcessing(true);
+    setErrors({});
 
     // Normalize number fields
+    const submitData = { ...data };
     fields.forEach((field) => {
       if (field.type === 'number') {
-        setData(field.name as keyof typeof data, String(Number(data[field.name as keyof typeof data]) || 0));
+        submitData[field.name] = String(Number(data[field.name]) || 0);
       }
     });
 
-    if (type === 'add') {
-      post(storeUrl, {
-        preserveScroll: true,
-        onSuccess: () => {
-          onClose();
-          onSuccess?.();
-        },
-      });
-    } else {
-      const id = initialData?.id;
-      if (!id) return;
-      put(updateUrl(Number(id)), {
-        preserveScroll: true,
-        onSuccess: () => {
-          onClose();
-          onSuccess?.();
-        },
-      });
+    try {
+      if (type === 'add') {
+        await api.post(storeUrl, submitData);
+      } else {
+        const id = initialData?.id;
+        if (!id) return;
+        await api.put(updateUrl(Number(id)), submitData);
+      }
+      onClose();
+      onSuccess?.();
+    } catch (error: any) {
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      } else {
+        setErrors({ general: error.response?.data?.message || 'An error occurred' });
+      }
+    } finally {
+      setProcessing(false);
     }
   }
 

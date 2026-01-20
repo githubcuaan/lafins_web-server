@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
-import { Inertia } from '@inertiajs/inertia';
-import JarsController from '@/actions/App/Http/Controllers/JarsController';
+import { useState } from 'react';
+import { jarsService } from '@/services/jars';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 
 export default function DeleteAllDataBox() {
+  const queryClient = useQueryClient();
   const [checked, setChecked] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmText, setConfirmText] = useState('');
+
+  const deleteAllMutation = useMutation({
+    mutationFn: jarsService.deleteAll,
+    onSuccess: () => {
+      closeModal();
+      queryClient.invalidateQueries({ queryKey: ['jars'] });
+    },
+  });
 
   function openModal() {
     setConfirmText('');
@@ -18,8 +27,7 @@ export default function DeleteAllDataBox() {
   }
 
   async function performDelete() {
-  // Call the controller route to delete all financial data and reset jars
-  Inertia.post(JarsController.deleteAll.url(), {}, { onSuccess: () => closeModal() });
+    deleteAllMutation.mutate();
   }
 
   return (

@@ -1,10 +1,11 @@
 import SuccessDialog from '@/components/alert-dialog';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import type { BreadcrumbItem } from '@/types';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import FSbox from '../components/FSbox';
 import AddIncomeModal from './incomes/addModal';
 import IncomesTable from './incomes/IncomesTable';
+import { useState, useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,21 +15,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Incomes() {
-    const { props } = usePage<
-        {
-            flash?: {
-                success?: string | null;
-                error?: string | null;
-                status?: string | null;
-            };
-        } & Record<string, unknown>
-    >();
-    const successMessage = props?.flash?.success ?? undefined;
+    useDocumentTitle('Incomes');
+    const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined);
+
+    // Clear success message after some time
+    useEffect(() => {
+        if (successMessage) {
+            const timer = setTimeout(() => setSuccessMessage(undefined), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [successMessage]);
 
     return (
         <>
             <AppLayout breadcrumbs={breadcrumbs}>
-                <Head title="Incomes" />
                 <main className="flex flex-1 flex-col gap-4 overflow-auto rounded-xl p-4">
                     <FSbox
                         endpoint="/incomes"

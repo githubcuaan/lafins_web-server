@@ -1,5 +1,4 @@
 import { useRef, useMemo } from "react";
-import { usePage } from '@inertiajs/react';
 import { Bar } from 'react-chartjs-2';
 import useResponsiveChartSize from '@/hooks/useResponsiveChartSize'
 import { createResponsiveOptions } from '@/lib/chartOptions'
@@ -16,13 +15,9 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-/**
- * Tạo dữ liệu biểu đồ cho cột Thu nhập/Chi tiêu.
- */
-const buildChartData = (props) => {
-    const summary = props?.summary ?? props ?? {}
-    const inc = Number(summary.total_income) || 0
-    const out = Number(summary.total_outcome) || 0
+const buildChartData = (summary) => {
+    const inc = Number(summary?.total_income) || 0
+    const out = Number(summary?.total_outcome) || 0
 
     return {
         labels: ['Money'],
@@ -84,12 +79,8 @@ const canvasBackgroundPlugin = {
     }
 }
 
-export default function IcomeOutcomeBar() {
-    // 1. take props in page
-    const { props } = usePage()
-
-    // 2. Build data from Inertia props (or fallbacks)
-    const chartData = useMemo(() => buildChartData(props), [props])
+export default function IcomeOutcomeBar({ summary = {} }) {
+    const chartData = useMemo(() => buildChartData(summary), [summary])
 
     // Defensive: ensure datasets exist and data arrays are arrays
     const okDatasets = chartData && Array.isArray(chartData.datasets) && chartData.datasets.every((d) => Array.isArray(d.data))

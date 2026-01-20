@@ -1,4 +1,16 @@
-import { useEffect, useState } from 'react'
+import { type RefObject, useEffect, useState } from 'react'
+
+interface ResponsiveChartSizeOptions {
+  min?: number;
+  max?: number;
+  scale?: number;
+  debounceMs?: number;
+}
+
+interface ResponsiveChartSizeResult {
+  size: number;
+  measuredWidth: number | null;
+}
 
 /**
  * useResponsiveChartSize
@@ -12,17 +24,20 @@ import { useEffect, useState } from 'react'
  * - Dùng ResizeObserver khi có, fallback sang window.resize khi không có.
  * - Bảo vệ SSR (typeof window === 'undefined').
  */
-export default function useResponsiveChartSize(containerRef, opts = {}) {
+export default function useResponsiveChartSize(
+  containerRef: RefObject<HTMLElement | null>,
+  opts: ResponsiveChartSizeOptions = {}
+): ResponsiveChartSizeResult {
   const { min = 220, max = 720, scale = 0.9, debounceMs = 80 } = opts
   const [size, setSize] = useState(320)
-  const [measuredWidth, setMeasuredWidth] = useState(null)
+  const [measuredWidth, setMeasuredWidth] = useState<number | null>(null)
 
   useEffect(() => {
     // SSR guard
     if (typeof window === 'undefined') return
 
     let mounted = true
-    let t = null
+    let t: number | null = null
 
     function compute() {
       const parent = containerRef?.current
@@ -36,13 +51,13 @@ export default function useResponsiveChartSize(containerRef, opts = {}) {
 
     function onResizeDebounced() {
       if (t) clearTimeout(t)
-      t = setTimeout(compute, debounceMs)
+      t = window.setTimeout(compute, debounceMs)
     }
 
     // initial compute
     compute()
 
-    let ro
+    let ro: ResizeObserver | undefined
     try {
       if (typeof ResizeObserver !== 'undefined') {
         ro = new ResizeObserver(onResizeDebounced)

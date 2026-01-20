@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
-import { Inertia } from '@inertiajs/inertia';
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { incomeApi } from '@/lib/api';
 import IncomeModal from '../../components/IncomeModal';
-import IncomeController from '@/actions/App/Http/Controllers/IncomeController';
-import BaseResourceTable, { Column } from '@/components/BaseResourceTable';
+import BaseResourceTable, { type Column } from '@/components/BaseResourceTable';
 
 
 // Kiểu paginator đơn giản
@@ -34,46 +33,23 @@ interface Income {
   formatted_amount?: string;
 }
 
-interface IncomesPageProps {
+interface IncomesTableProps {
   incomes?: Income[] | Paginator<Income>;
   loading?: boolean;
   error?: string | null;
-  // ... các props khác nếu có ...
 }
 
-export default function IncomesTable() {
+export default function IncomesTable({ incomes: incomesData, loading = false, error = null }: IncomesTableProps) {
+  const queryClient = useQueryClient();
 
-  // 1. Đọc props từ server do Inertia cung cấp
-  const { props } = usePage<IncomesPageProps & Record<string, unknown>>();
-
-  // 2. DEBUG: Ghi log dữ liệu controller gửi tới console trình duyệt khi điều hướng tới trang Incomes
-  useEffect(() => {
-      // Thu hẹp log xuống các khóa liên quan để dễ đọc, nhưng vẫn in full props
-      if (typeof console.groupCollapsed === 'function') {
-          console.groupCollapsed('Incomes props');
-      }
-      console.log('full props:', props);
-      
-      if (typeof console.groupEnd === 'function') {
-          console.groupEnd();
-      }
-  }, [props]);
-
-  // 3. Lấy data từ props
-  // Dữ liệu từ backend thường gắn `incomes` vào props của trang; viết code phòng ngừa
-  const raw: unknown = props?.incomes as unknown;
-
-  // Dùng type guard để chuẩn hóa
+  // Normalize data
+  const raw: unknown = incomesData as unknown;
   const isPag = isPaginator<Income>(raw);
   const incomes = isPag
     ? raw.data
     : Array.isArray(raw)
       ? (raw as Income[])
       : [] as Income[];
-
-  // Lấy trạng thái loading/error từ props nếu có, nếu không thì dùng giá trị mặc định
-  const loading = props?.loading ?? false;
-  const error = props?.error ?? null;
 
   const [editing, setEditing] = useState<Income | null>(null);
 
@@ -89,10 +65,15 @@ export default function IncomesTable() {
     }).format(Number(value) || 0);
   }
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: number | string) => incomeApi.deleteIncome(Number(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['incomes'] });
+    },
+  });
+
   function handleDelete(id: number | string) {
-    // Xoá bằng Inertia với type-safe route từ IncomeController
-    const route = IncomeController.destroy(Number(id));
-    Inertia.delete(route.url, { preserveState: false });
+    deleteMutation.mutate(id);
   }
 
   const columns: Column<Income>[] = [

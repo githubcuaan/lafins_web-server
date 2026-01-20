@@ -7,7 +7,7 @@ import { edit as editPassword } from '@/routes/password';
 import { edit } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, useLocation } from 'react-router-dom';
 import { type PropsWithChildren } from 'react';
 
 const sidebarNavItems: NavItem[] = [
@@ -34,12 +34,8 @@ const sidebarNavItems: NavItem[] = [
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
-    // When server-side rendering, we only render the layout on the client...
-    if (typeof window === 'undefined') {
-        return null;
-    }
-
-    const currentPath = window.location.pathname;
+    const location = useLocation();
+    const currentPath = location.pathname;
 
     return (
         <div className="px-4 py-6">
@@ -53,19 +49,15 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                     <nav className="flex flex-col space-y-1 space-x-0">
                         {sidebarNavItems.map((item, index) => (
                             <Button
-                                key={`${typeof item.href === 'string' ? item.href : item.href.url}-${index}`}
+                                key={`${item.href}-${index}`}
                                 size="sm"
                                 variant="ghost"
                                 asChild
                                 className={cn('w-full justify-start', {
-                                    'bg-muted':
-                                        currentPath ===
-                                        (typeof item.href === 'string'
-                                            ? item.href
-                                            : item.href.url),
+                                    'bg-muted': currentPath === item.href,
                                 })}
                             >
-                                <Link href={item.href}>
+                                <Link to={item.href}>
                                     {item.icon && (
                                         <item.icon className="h-4 w-4" />
                                     )}

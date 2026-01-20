@@ -1,8 +1,4 @@
-import { usePage } from '@inertiajs/react';
-
-export default function TotalBalance({ className = 'w-full' }) {
-    const { props } = usePage();
-    const total = Number(props?.summary?.total_balance) || 0;
+export default function TotalBalance({ className = 'w-full', total = 0 }) {
 
     return (
         <div className={className}>

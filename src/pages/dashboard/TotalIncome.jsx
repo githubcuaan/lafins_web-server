@@ -1,8 +1,4 @@
-import { usePage } from '@inertiajs/react';
-
-export default function TotalIncome({ className = 'w-full' }) {
-    const { props } = usePage();
-    const total = Number(props?.summary?.total_income) || 0;
+export default function TotalIncome({ className = 'w-full', total = 0 }) {
 
     return (
         <div className={className}>

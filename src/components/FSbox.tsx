@@ -4,7 +4,7 @@ import SearchBox from "./SearchBox";
 import FillterOrder from "./filter-order";
 import AddBtn from "./add-btn";
 import { useState } from 'react';
-import { router, usePage } from "@inertiajs/react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 type FSboxProps = {
     endpoint: string;
@@ -27,23 +27,23 @@ export default function FSbox({
     const [open, setOpen] = useState(false);
 
     // state for sort
-    const { props } = usePage<{ filters?: Record<string, string | number | undefined> }>();
-    const { filters } = props ?? {};
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const filters = Object.fromEntries(searchParams.entries());
 
     const handleSortChange = (v: { by: string; dir: string }) => {
         const currentBy = filters?.sort_by ?? defaultSortBy;
         const currentDir = filters?.sort_dir ?? defaultSortDir;
         if (String(currentBy) === String(v.by) && String(currentDir) === String(v.dir)) return;
 
-        router.get(endpoint, {
+        const data = {
             ...filters,
             sort_by: v.by,
             sort_dir: v.dir,
-            page: 1,
-        }, {
-            preserveState: true,
-            replace: true,
-        });
+            page: '1',
+        };
+        const params = new URLSearchParams(data as Record<string, string>);
+        navigate(`${endpoint}?${params.toString()}`, { replace: true });
     };
 
     return (

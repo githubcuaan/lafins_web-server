@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { Jar } from '@/types';
 
 interface JarCardProps {

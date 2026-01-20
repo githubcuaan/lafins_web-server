@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -30,10 +30,10 @@ export default function SuccessDialog({
   confirmText = 'OK',
   onClose,
 }: Props) {
-  const { props } = usePage<{ flash?: { success?: string | null; error?: string | null } } & Record<string, unknown>>();
-
-  const flashSuccess = props?.flash?.success ?? null;
-  const flashError = props?.flash?.error ?? null;
+  const [searchParams] = useSearchParams();
+  
+  const flashSuccess = searchParams.get('flash_success') ?? null;
+  const flashError = searchParams.get('flash_error') ?? null;
 
   const message = explicitMessage ?? (suppressFlash ? null : (flashError ?? flashSuccess)) ?? null;
   const variant: 'success' | 'error' = explicitVariant ?? (suppressFlash ? 'success' : (flashError ? 'error' : 'success'));

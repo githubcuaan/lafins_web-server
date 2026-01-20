@@ -1,4 +1,4 @@
-import { router, usePage } from '@inertiajs/react';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import React, { useRef, useState } from 'react';
 
 export default function SearchBox() {
@@ -11,10 +11,11 @@ export default function SearchBox() {
     // state for search
     // mirror open state in a ref so rapid clicks can read current value synchronously
     const openRef = useRef<boolean>(false);
-    const { props } = usePage<{
-        filters?: Record<string, string | number | undefined>;
-    }>();
-    // loading indicator while Inertia request is in progress
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams] = useSearchParams();
+    const filters = Object.fromEntries(searchParams.entries());
+    // loading indicator while request is in progress
     const [loading, setLoading] = useState(false);
 
     // funtion for animate
@@ -60,39 +61,30 @@ export default function SearchBox() {
             const val = inputRef.current?.value ?? '';
             const page = 1; // reset to first page on new search
 
-            // preserve other filters if present (read from top-level props)
-            const filters = props?.filters ?? {};
-            const data = { ...filters, search: val, page };
-            router.get(window.location.pathname, data, {
-                preserveState: false,
-                preserveScroll: true,
-                // show spinner while request is in flight
-                onStart: () => setLoading(true),
-                onFinish: () => setLoading(false),
-            });
+            // preserve other filters if present
+            const data = { ...filters, search: val, page: String(page) };
+            setLoading(true);
+            const params = new URLSearchParams(data as Record<string, string>);
+            navigate(`${location.pathname}?${params.toString()}`, { replace: false });
+            setLoading(false);
         }
     }
 
     function submitSearch() {
         const val = inputRef.current?.value ?? '';
         const page = 1;
-        const filters = props?.filters ?? {};
-        const data = { ...filters, search: val, page };
-        router.get(window.location.pathname, data, {
-            preserveState: false,
-            preserveScroll: true,
-            onStart: () => setLoading(true),
-            onFinish: () => setLoading(false),
-        });
+        const data = { ...filters, search: val, page: String(page) };
+        setLoading(true);
+        const params = new URLSearchParams(data as Record<string, string>);
+        navigate(`${location.pathname}?${params.toString()}`, { replace: false });
+        setLoading(false);
     }
 
     // clear search from URL (and input) and reload preserving other filters
     function clearSearch() {
-        const filters = props?.filters
-            ? { ...props.filters }
-            : ({} as Record<string, string | number | undefined>);
-        if (filters.search) delete filters.search;
-        const data = { ...filters, page: 1 };
+        const currentFilters = { ...filters };
+        if (currentFilters.search) delete currentFilters.search;
+        const data = { ...currentFilters, page: '1' };
 
         // clear input visually
         if (inputRef.current) inputRef.current.value = '';
@@ -100,12 +92,10 @@ export default function SearchBox() {
         setOpen(false);
         openRef.current = false;
 
-        router.get(window.location.pathname, data, {
-            preserveState: false,
-            preserveScroll: true,
-            onStart: () => setLoading(true),
-            onFinish: () => setLoading(false),
-        });
+        setLoading(true);
+        const params = new URLSearchParams(data as Record<string, string>);
+        navigate(`${location.pathname}?${params.toString()}`, { replace: false });
+        setLoading(false);
     }
 
     return (
@@ -171,7 +161,7 @@ export default function SearchBox() {
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
             />
-            {open && props && props.filters && props.filters.search ? (
+            {open && filters && filters.search ? (
                 <button
                     type="button"
                     className="search-clear ml-2 text-sm text-muted-foreground"

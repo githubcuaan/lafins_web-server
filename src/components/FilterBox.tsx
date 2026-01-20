@@ -1,5 +1,5 @@
 import TimeRangeModal from '@/components/TimeRangeModal';
-import { router, usePage } from '@inertiajs/react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 function Fillter({
@@ -33,9 +33,9 @@ export default function FillterBox({
     className,
     endpoint = '/dashboard',
 }: FillterBoxProps) {
-    const { props } = usePage();
-    const filters =
-        props?.filters ?? ({} as Record<string, string | undefined>);
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const filters = Object.fromEntries(searchParams.entries());
 
     function detectSelectedFromFilters(
         filters:
@@ -83,81 +83,53 @@ export default function FillterBox({
     // Keep previous selected filter so we can restore if user cancels/outside-clicks the options modal
     const [prevSelected, setPrevSelected] = useState<string | null>(null);
 
-    // update when server props change (e.g., after an Inertia visit)
+    // update when URL params change
     useEffect(() => {
-        setSelected(detectSelectedFromFilters(props?.filters ?? {}));
-    }, [props?.filters]);
+        setSelected(detectSelectedFromFilters(filters));
+    }, [searchParams]);
 
     function applyRange(start: string, end: string, name: string) {
         // Preserve other filters (search, per_page, etc.) and reset to page 1
-        const currentFilters =
-            props?.filters ??
-            ({} as Record<string, string | number | undefined>);
+        const currentFilters = { ...filters };
         // Remove any existing 'range' when applying custom start/end
-        const rest = {
-            ...(currentFilters as Record<string, string | number | undefined>),
-        };
-        delete (rest as Record<string, unknown>).range;
-        router.get(
-            endpoint,
-            { ...rest, start, end, page: 1 },
-            { preserveState: false, replace: false },
-        );
+        delete (currentFilters as Record<string, unknown>).range;
+        const data = { ...currentFilters, start, end, page: '1' };
+        const params = new URLSearchParams(data as Record<string, string>);
+        navigate(`${endpoint}?${params.toString()}`, { replace: false });
         setSelected(name);
     }
 
     function applyDay() {
         // Preserve other filters (search, per_page, etc.) and reset to page 1
-        const currentFilters =
-            props?.filters ??
-            ({} as Record<string, string | number | undefined>);
+        const currentFilters = { ...filters };
         // Remove custom start/end when using preset range
-        const rest = {
-            ...(currentFilters as Record<string, string | number | undefined>),
-        };
-        delete (rest as Record<string, unknown>).start;
-        delete (rest as Record<string, unknown>).end;
-        router.get(
-            endpoint,
-            { ...rest, range: 'day', page: 1 },
-            { preserveState: false, replace: false },
-        );
+        delete (currentFilters as Record<string, unknown>).start;
+        delete (currentFilters as Record<string, unknown>).end;
+        const data = { ...currentFilters, range: 'day', page: '1' };
+        const params = new URLSearchParams(data as Record<string, string>);
+        navigate(`${endpoint}?${params.toString()}`, { replace: false });
         setSelected('Day');
     }
 
     function applyMonth() {
         // Preserve other filters (search, per_page, etc.) and reset to page 1
-        const currentFilters =
-            props?.filters ??
-            ({} as Record<string, string | number | undefined>);
-        const rest = {
-            ...(currentFilters as Record<string, string | number | undefined>),
-        };
-        delete (rest as Record<string, unknown>).start;
-        delete (rest as Record<string, unknown>).end;
-        router.get(
-            endpoint,
-            { ...rest, range: 'month', page: 1 },
-            { preserveState: false, replace: false },
-        );
+        const currentFilters = { ...filters };
+        delete (currentFilters as Record<string, unknown>).start;
+        delete (currentFilters as Record<string, unknown>).end;
+        const data = { ...currentFilters, range: 'month', page: '1' };
+        const params = new URLSearchParams(data as Record<string, string>);
+        navigate(`${endpoint}?${params.toString()}`, { replace: false });
         setSelected('Month');
     }
 
     function applyYear() {
         // Preserve other filters (search, per_page, etc.) and reset to page 1
-        const currentFilters =
-            props?.filters ??
-            ({} as Record<string, string | number | undefined>);
-        const rest = {
-            ...(currentFilters as Record<string, string | number | undefined>),
-        };
-        delete (rest as Record<string, unknown>).start;
-        delete (rest as Record<string, unknown>).end;
-        router.get(
-            endpoint,
-            { ...rest, range: 'year', page: 1 },
-            { preserveState: false, replace: false },
-        );
+        const currentFilters = { ...filters };
+        delete (currentFilters as Record<string, unknown>).start;
+        delete (currentFilters as Record<string, unknown>).end;
+        const data = { ...currentFilters, range: 'year', page: '1' };
+        const params = new URLSearchParams(data as Record<string, string>);
+        navigate(`${endpoint}?${params.toString()}`, { replace: false });
         setSelected('Year');
     }
 
@@ -185,10 +157,10 @@ export default function FillterBox({
                     setPrevSelected(null);
                 }}
                 onCancel={() => {
-                    // restore previous selection (or fallback to server-determined)
+                    // restore previous selection (or fallback to URL-determined)
                     const restore =
                         prevSelected ??
-                        detectSelectedFromFilters(props?.filters ?? {});
+                        detectSelectedFromFilters(filters);
                     setSelected(restore);
                     setPrevSelected(null);
                 }}

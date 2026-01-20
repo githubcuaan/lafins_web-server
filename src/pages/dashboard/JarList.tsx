@@ -1,6 +1,5 @@
-import { usePage } from "@inertiajs/react";
 import { useState } from 'react';
-import type { Jars, Jar } from '@/types';
+import type { Jar } from '@/types';
 import OutcomeModal from '@/components/OutcomeModal';
 
 const iconByKey: Record<string, string> = {
@@ -46,15 +45,13 @@ function JarBox({ name = 'Unknown Jar', balance = 0, percentage, icon, className
     )
 }
 
-export default function JarList({ className }: {className:string}) {
-    // Use a consistent layout:
-    // - mobile: single column
-    // - sm: 3 columns
-    // - md and up: 3 columns x 2 rows
-    const containerClass = `${className ?? ''} grid grid-cols-1 sm:grid-cols-3 max-[770px]:!grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 items-stretch`;
+interface JarListProps {
+    className?: string;
+    jars?: Jar[];
+}
 
-    const {props} = usePage<Jars>();
-    const jars = props?.jars ?? [];
+export default function JarList({ className = '', jars = [] }: JarListProps) {
+    const containerClass = `${className ?? ''} grid grid-cols-1 sm:grid-cols-3 max-[770px]:!grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 items-stretch`;
 
     // modal state: open when user clicks a jar to add an outcome
     const [isModalOpen, setIsModalOpen] = useState(false);

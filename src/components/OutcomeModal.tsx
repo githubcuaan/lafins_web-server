@@ -1,7 +1,7 @@
-import BaseModal, { BaseModalField } from './BaseModal';
-import { usePage } from '@inertiajs/react';
+import BaseModal, { type BaseModalField } from './BaseModal';
+import { useAuth } from '@/hooks/useAuth';
 import type { Jar } from '@/types';
-import OutcomeController from '@/actions/App/Http/Controllers/OutcomeController';
+// import OutcomeController from '@/actions/App/Http/Controllers/OutcomeController';
 
 type ModalType = 'add' | 'update';
 
@@ -21,8 +21,8 @@ interface OutcomeModalProps {
 }
 
 export default function OutcomeModal({ type, isOpen, onClose, initialData = null, onSuccess }: OutcomeModalProps) {
-  const { props } = usePage<{ jars?: Jar[] }>();
-  const jars = props?.jars ?? [];
+  const { user } = useAuth();
+  const jars = (user as any)?.jars ?? [];
 
   const outcomeFields: BaseModalField[] = [
     {
@@ -42,7 +42,7 @@ export default function OutcomeModal({ type, isOpen, onClose, initialData = null
       label: 'Jar',
       type: 'select',
       required: true,
-  options: jars.map((jar) => ({ label: jar.name|| jar.key || jar.id.toString(), value: jar.id })),
+  options: jars.map((jar: Jar) => ({ label: jar.name|| jar.key || jar.id.toString(), value: jar.id })),
     },
     {
       name: 'description',
@@ -72,7 +72,7 @@ export default function OutcomeModal({ type, isOpen, onClose, initialData = null
   function renderFieldExtra(fieldName: string, value: string, data: Record<string, string>) {
     if (fieldName !== 'jar_id') return null;
     const selectedId = Number(value || data['jar_id'] || initialData?.jar_id || '');
-    const jar = jars.find((j) => Number(j.id) === selectedId) as Jar | undefined;
+    const jar = jars.find((j: Jar) => Number(j.id) === selectedId) as Jar | undefined;
     if (!jar) return null;
 
     return (
@@ -89,8 +89,8 @@ export default function OutcomeModal({ type, isOpen, onClose, initialData = null
       fields={outcomeFields}
       initialData={initialData}
       onSuccess={onSuccess}
-      storeUrl={OutcomeController.store.url()}
-      updateUrl={(id) => OutcomeController.update.url(id)}
+      storeUrl="/api/outcomes"
+      updateUrl={(id) => `/api/outcomes/${id}`}
       fieldExtra={renderFieldExtra}
     />
   );

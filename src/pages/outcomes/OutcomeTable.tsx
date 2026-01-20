@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { usePage } from '@inertiajs/react';
-import { Inertia } from '@inertiajs/inertia';
-import BaseResourceTable, { Column } from '@/components/BaseResourceTable';
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { outcomeApi } from '@/lib/api';
+import BaseResourceTable, { type Column } from '@/components/BaseResourceTable';
 import OutcomeModal from '@/components/OutcomeModal';
 
 // Simple paginator type
@@ -31,27 +31,18 @@ interface Outcome {
 	formatted_amount?: string;
 }
 
-interface OutcomesPageProps {
+interface OutcomeTableProps {
 	outcomes?: Outcome[] | Paginator<Outcome>;
 	loading?: boolean;
 	error?: string | null;
 }
 
-export default function OutcomeTable() {
-	const { props } = usePage<OutcomesPageProps & Record<string, unknown>>();
+export default function OutcomeTable({ outcomes: outcomesData, loading = false, error = null }: OutcomeTableProps) {
+	const queryClient = useQueryClient();
 
-	useEffect(() => {
-		if (typeof console.groupCollapsed === 'function') console.groupCollapsed('Outcomes props');
-		console.log('full props:', props);
-		if (typeof console.groupEnd === 'function') console.groupEnd();
-	}, [props]);
-
-	const raw: unknown = props?.outcomes as unknown;
+	const raw: unknown = outcomesData as unknown;
 	const isPag = isPaginator<Outcome>(raw);
 	const outcomes = isPag ? raw.data : Array.isArray(raw) ? (raw as Outcome[]) : ([] as Outcome[]);
-
-	const loading = props?.loading ?? false;
-	const error = props?.error ?? null;
 
 	const [editing, setEditing] = useState<Outcome | null>(null);
 
@@ -65,8 +56,15 @@ export default function OutcomeTable() {
 		}).format(Number(value) || 0);
 	}
 
+	const deleteMutation = useMutation({
+		mutationFn: (id: number | string) => outcomeApi.deleteOutcome(Number(id)),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['outcomes'] });
+		},
+	});
+
 	function handleDelete(id: number | string) {
-		Inertia.delete(`/outcomes/${id}`, { preserveState: false });
+		deleteMutation.mutate(id);
 	}
 
 	const columns: Column<Outcome>[] = [

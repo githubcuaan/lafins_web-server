@@ -7,10 +7,10 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { regenerateRecoveryCodes } from '@/routes/two-factor';
-import { Form } from '@inertiajs/react';
 import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AlertError from './alert-error';
+import api from '@/services/api';
 
 interface TwoFactorRecoveryCodesProps {
     recoveryCodesList: string[];
@@ -24,8 +24,22 @@ export default function TwoFactorRecoveryCodes({
     errors,
 }: TwoFactorRecoveryCodesProps) {
     const [codesAreVisible, setCodesAreVisible] = useState<boolean>(false);
+    const [processing, setProcessing] = useState(false);
     const codesSectionRef = useRef<HTMLDivElement | null>(null);
     const canRegenerateCodes = recoveryCodesList.length > 0 && codesAreVisible;
+
+    const handleRegenerateCodes = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setProcessing(true);
+        try {
+            await api.post(regenerateRecoveryCodes());
+            await fetchRecoveryCodes();
+        } catch (error) {
+            console.error('Failed to regenerate codes:', error);
+        } finally {
+            setProcessing(false);
+        }
+    };
 
     const toggleCodesVisibility = useCallback(async () => {
         if (!codesAreVisible && !recoveryCodesList.length) {
@@ -80,22 +94,16 @@ export default function TwoFactorRecoveryCodes({
                     </Button>
 
                     {canRegenerateCodes && (
-                        <Form
-                            {...regenerateRecoveryCodes.form()}
-                            options={{ preserveScroll: true }}
-                            onSuccess={fetchRecoveryCodes}
-                        >
-                            {({ processing }) => (
-                                <Button
-                                    variant="secondary"
-                                    type="submit"
-                                    disabled={processing}
-                                    aria-describedby="regenerate-warning"
-                                >
-                                    <RefreshCw /> Regenerate Codes
-                                </Button>
-                            )}
-                        </Form>
+                        <form onSubmit={handleRegenerateCodes}>
+                            <Button
+                                variant="secondary"
+                                type="submit"
+                                disabled={processing}
+                                aria-describedby="regenerate-warning"
+                            >
+                                <RefreshCw /> Regenerate Codes
+                            </Button>
+                        </form>
                     )}
                 </div>
                 <div

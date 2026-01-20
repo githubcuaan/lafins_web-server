@@ -1,4 +1,4 @@
-import { router, usePage } from '@inertiajs/react';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import PaginationButton from './PaginationButton';
 
 // Component: Pagination
@@ -32,8 +32,11 @@ interface Props {
 }
 
 export default function Pagination({ paginator, buildUrl }: Props) {
-    // 1. take props from server
-    const { props } = usePage();
+    // 1. take params from URL
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams] = useSearchParams();
+    const filters = Object.fromEntries(searchParams.entries());
 
     if (!paginator) return null;
 
@@ -57,31 +60,18 @@ export default function Pagination({ paginator, buildUrl }: Props) {
 
     function goTo(page: number) {
         if (page < 1 || page > last || page === current) return;
-        // Keep existing filters/query params (server exposes them under props.filters)
-        const basePath = pg.path ?? window.location.pathname;
-        const filters =
-            props &&
-            (props as { filters?: Record<string, string | number | undefined> })
-                .filters
-                ? (
-                      props as {
-                          filters?: Record<string, string | number | undefined>;
-                      }
-                  ).filters!
-                : {};
+        // Keep existing filters/query params
+        const basePath = pg.path ?? location.pathname;
 
         if (buildUrl) {
             const url = buildUrl(page);
-            router.get(url, {}, { preserveState: true, preserveScroll: true });
+            navigate(url, { replace: false });
             return;
         }
 
-        const data = { ...filters, page };
-        // Use router.get with path + data so query params are constructed correctly
-        router.get(basePath, data, {
-            preserveState: true,
-            preserveScroll: true,
-        });
+        const data = { ...filters, page: String(page) };
+        const params = new URLSearchParams(data as Record<string, string>);
+        navigate(`${basePath}?${params.toString()}`, { replace: false });
     }
 
     return (

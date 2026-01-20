@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import ActionButton from '@/components/ActionButton'
 import DeleteRow from '@/components/delete-row'
 import type { Column, IdLike } from './BaseResourceTable'

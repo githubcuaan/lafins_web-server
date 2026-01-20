@@ -1,6 +1,4 @@
 
-import React from 'react';
-
 interface ConfigHeaderProps {
     title?: string;
     subtitle?: string;

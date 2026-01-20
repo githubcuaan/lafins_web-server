@@ -1,7 +1,7 @@
 import FSbox from "@/components/FSbox";
 import AppLayout from "@/layouts/app-layout";
-import { BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
+import type { BreadcrumbItem } from "@/types";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import AddOutcomeModal from "./outcomes/AddOutcomeModal";
 import OutcomeTable from "./outcomes/OutcomeTable";
 
@@ -14,9 +14,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 export default function Outcomes() {
+    useDocumentTitle('Outcomes');
+    
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Outcomes" />
             <main className="flex flex-1 flex-col gap-4 overflow-auto rounded-xl p-4">
                 <FSbox 
                     endpoint="/outcomes"

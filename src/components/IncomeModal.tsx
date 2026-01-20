@@ -1,5 +1,5 @@
-import IncomeController from '../actions/App/Http/Controllers/IncomeController';
-import BaseModal, { BaseModalField } from './BaseModal';
+// import IncomeController from '../actions/App/Http/Controllers/IncomeController';
+import BaseModal, { type BaseModalField } from './BaseModal';
 
 type ModalType = 'add' | 'update';
 
@@ -53,8 +53,8 @@ export default function IncomeModal({ type, isOpen, onClose, initialData = null,
       fields={incomeFields}
       initialData={initialData}
       onSuccess={onSuccess}
-      storeUrl={IncomeController.store.url()}
-      updateUrl={(id) => IncomeController.update.url(id)}
+      storeUrl="/api/incomes"
+      updateUrl={(id) => `/api/incomes/${id}`}
     />
   );
 }

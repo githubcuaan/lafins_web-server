@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link } from 'react-router-dom';
 import { BookOpen, Folder, LayoutGrid, ArrowUpCircle, ArrowDownCircle, Sliders } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -59,7 +59,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link to={dashboard()}>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
