@@ -23,12 +23,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Profile({
-  mustVerifyEmail,
+  mustVerifyEmail = false,
   status,
 }: {
-  mustVerifyEmail: boolean;
+  mustVerifyEmail?: boolean;
   status?: string;
-}) {
+} = {}) {
   useDocumentTitle("Profile settings");
 
   const { user } = useAuth();
