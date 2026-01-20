@@ -10,6 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   error: AuthError | null;
   checkAuth: () => Promise<void>;
+  appName: string;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -89,7 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, register, logout, isLoading, error, checkAuth }}
+      value={{ user, login, register, logout, isLoading, error, checkAuth, appName: 'Lafins' }}
     >
       {children}
     </AuthContext.Provider>
