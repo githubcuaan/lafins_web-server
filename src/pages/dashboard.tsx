@@ -3,6 +3,7 @@ import { type BreadcrumbItem } from "@/types";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useQuery } from "@tanstack/react-query";
 import { dashboardService } from "@/services/dashboard";
+import { useSearchParams } from "react-router-dom";
 
 import {
   TotalBalance,
@@ -24,9 +25,26 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Dashboard() {
   useDocumentTitle("Dashboard");
 
+  // Get filter parameters from URL
+  const [searchParams] = useSearchParams();
+  const range = searchParams.get("range");
+  const startDate = searchParams.get("start_date");
+  const endDate = searchParams.get("end_date");
+  const page = searchParams.get("page");
+
+  // Build filter object (only include non-null values)
+  const filters = Object.fromEntries(
+    Object.entries({
+      range,
+      start_date: startDate,
+      end_date: endDate,
+      page,
+    }).filter(([_, value]) => value !== null),
+  );
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["dashboard"],
-    queryFn: () => dashboardService.getDashboardData(),
+    queryKey: ["dashboard", filters],
+    queryFn: () => dashboardService.getDashboardData(filters),
   });
 
   if (isLoading) {
