@@ -1,16 +1,22 @@
-import { useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
-import { Button } from './ui/button';
-import api from '@/services/api';
+import { useCallback, useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import api from "@/services/api";
 
-type ModalType = 'add' | 'update';
+type ModalType = "add" | "update";
 
 // interfaces of input field
 export interface BaseModalField {
   name: string;
   label: string;
-  type: 'text' | 'date' | 'number' | 'textarea' | 'select';
+  type: "text" | "date" | "number" | "textarea" | "select";
   placeholder?: string;
   options?: Array<{ label: string; value: string | number }>;
   required?: boolean;
@@ -23,12 +29,18 @@ interface BaseModalProps {
   onClose: () => void;
   title: string;
   fields: BaseModalField[];
-  initialData?: Partial<Record<string, string | number | null | undefined>> | null;
+  initialData?: Partial<
+    Record<string, string | number | null | undefined>
+  > | null;
   onSuccess?: () => void;
   storeUrl: string;
   updateUrl: (id: number) => string;
   // Optional renderer for extra content under a specific field.
-  fieldExtra?: (fieldName: string, value: string, data: Record<string, string>) => ReactNode;
+  fieldExtra?: (
+    fieldName: string,
+    value: string,
+    data: Record<string, string>,
+  ) => ReactNode;
 }
 
 // main funct
@@ -45,48 +57,61 @@ export default function BaseModal({
   fieldExtra,
 }: BaseModalProps) {
   // Create initial form data from fields
-  const initialFormData = fields.reduce((acc, field) => {
-    acc[field.name] = '';
-    return acc;
-  }, {} as Record<string, string>);
+  const initialFormData = fields.reduce(
+    (acc, field) => {
+      acc[field.name] = "";
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
-  const [data, setDataState] = useState<Record<string, string>>(initialFormData);
+  const [data, setDataState] =
+    useState<Record<string, string>>(initialFormData);
   const [processing, setProcessing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const setData = (key: string, value: string) => {
-    setDataState(prev => ({ ...prev, [key]: value }));
-  };
-
-  const reset = () => {
-    setDataState(initialFormData);
-    setErrors({});
-  };
+  const setData = useCallback((key: string, value: string) => {
+    setDataState((prev) => ({ ...prev, [key]: value }));
+  }, []);
 
   // Update form when modal is open
   useEffect(() => {
     if (!isOpen) return;
 
+    setErrors({});
+
+    const nextData: Record<string, string> = {};
+
     if (initialData) {
       fields.forEach((field) => {
         const value = initialData[field.name];
-        setData(field.name as keyof typeof data, value != null ? String(value) : '');
+        nextData[field.name] = value != null ? String(value) : "";
       });
-    } else if (type === 'add') {
+    } else if (type === "add") {
       // reset to initial then set any date fields to today
-      reset();
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       fields.forEach((field) => {
-        if (field.type === 'date') {
-          setData(field.name as keyof typeof data, today);
+        if (field.type === "date") {
+          nextData[field.name] = today;
+        } else {
+          nextData[field.name] = "";
         }
       });
     }
-  }, [initialData, type, isOpen, fields, reset, setData]);
+
+    setDataState(nextData);
+    // Dependency Array chuẩn chỉ:
+    // Chỉ chạy lại khi: Modal mở/đóng, Data đầu vào đổi, hoặc Loại form đổi.
+    // fields thường là tĩnh (static config) nên bỏ vào cũng an toàn.
+  }, [initialData, type, isOpen, fields]);
 
   // Handle input change
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  function handleChange(
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) {
     const { name, value } = e.target;
     setData(name as keyof typeof data, value);
   }
@@ -100,13 +125,13 @@ export default function BaseModal({
     // Normalize number fields
     const submitData = { ...data };
     fields.forEach((field) => {
-      if (field.type === 'number') {
+      if (field.type === "number") {
         submitData[field.name] = String(Number(data[field.name]) || 0);
       }
     });
 
     try {
-      if (type === 'add') {
+      if (type === "add") {
         await api.post(storeUrl, submitData);
       } else {
         const id = initialData?.id;
@@ -119,7 +144,9 @@ export default function BaseModal({
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       } else {
-        setErrors({ general: error.response?.data?.message || 'An error occurred' });
+        setErrors({
+          general: error.response?.data?.message || "An error occurred",
+        });
       }
     } finally {
       setProcessing(false);
@@ -135,7 +162,7 @@ export default function BaseModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-            {/* map -> foreach -> create input div */}
+          {/* map -> foreach -> create input div */}
           {fields.map((field) => (
             <div key={field.name}>
               <label className="block text-sm font-medium mb-1">
@@ -143,19 +170,19 @@ export default function BaseModal({
                 {field.required && <span className="text-red-500 ml-1">*</span>}
               </label>
 
-              {field.type === 'textarea' ? (
+              {field.type === "textarea" ? (
                 <textarea
                   name={field.name}
-                  value={data[field.name] || ''}
+                  value={data[field.name] || ""}
                   onChange={handleChange}
                   placeholder={field.placeholder}
                   className="w-full rounded-md border px-3 py-2 min-h-[80px]"
                   required={field.required}
                 />
-              ) : field.type === 'select' ? (
+              ) : field.type === "select" ? (
                 <select
                   name={field.name}
-                  value={data[field.name] || ''}
+                  value={data[field.name] || ""}
                   onChange={handleChange}
                   className="w-full rounded-md border px-3 py-2"
                   required={field.required}
@@ -171,7 +198,7 @@ export default function BaseModal({
                 <input
                   name={field.name}
                   type={field.type}
-                  value={data[field.name] || ''}
+                  value={data[field.name] || ""}
                   onChange={handleChange}
                   placeholder={field.placeholder}
                   className="w-full rounded-md border px-3 py-2"
@@ -180,7 +207,9 @@ export default function BaseModal({
               )}
 
               {errors[field.name] && (
-                <div className="text-red-500 text-sm mt-1">{String(errors[field.name])}</div>
+                <div className="text-red-500 text-sm mt-1">
+                  {String(errors[field.name])}
+                </div>
               )}
 
               {/* optional extra renderer for a field (e.g. show jar balance under jar select) */}
@@ -193,7 +222,7 @@ export default function BaseModal({
               Cancel
             </Button>
             <Button type="submit" disabled={processing}>
-              {processing ? 'Saving...' : 'Save'}
+              {processing ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </form>
