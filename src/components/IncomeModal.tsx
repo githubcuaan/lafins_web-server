@@ -1,7 +1,7 @@
 // import IncomeController from '../actions/App/Http/Controllers/IncomeController';
-import BaseModal, { type BaseModalField } from './BaseModal';
+import BaseModal, { type BaseModalField } from "./BaseModal";
 
-type ModalType = 'add' | 'update';
+type ModalType = "add" | "update";
 
 interface IncomeModalProps {
   type: ModalType;
@@ -19,42 +19,48 @@ interface IncomeModalProps {
 
 const incomeFields: BaseModalField[] = [
   {
-    name: 'date',
-    label: 'Date',
-    type: 'date',
+    name: "date",
+    label: "Date",
+    type: "date",
     required: true,
   },
   {
-    name: 'source',
-    label: 'Category / Source',
-    type: 'text',
+    name: "source",
+    label: "Category / Source",
+    type: "text",
     required: true,
   },
   {
-    name: 'description',
-    label: 'Description',
-    type: 'textarea',
+    name: "description",
+    label: "Description",
+    type: "textarea",
   },
   {
-    name: 'amount',
-    label: 'Amount',
-    type: 'number',
+    name: "amount",
+    label: "Amount",
+    type: "number",
     required: true,
   },
 ];
 
-export default function IncomeModal({ type, isOpen, onClose, initialData = null, onSuccess }: IncomeModalProps) {
+export default function IncomeModal({
+  type,
+  isOpen,
+  onClose,
+  initialData = null,
+  onSuccess,
+}: IncomeModalProps) {
   return (
     <BaseModal
       type={type}
       isOpen={isOpen}
       onClose={onClose}
-      title={type === 'add' ? 'Add Income' : 'Edit Income'}
+      title={type === "add" ? "Add Income" : "Edit Income"}
       fields={incomeFields}
       initialData={initialData}
       onSuccess={onSuccess}
-      storeUrl="/api/incomes"
-      updateUrl={(id) => `/api/incomes/${id}`}
+      storeUrl="/incomes"
+      updateUrl={(id) => `/incomes/${id}`}
     />
   );
 }
