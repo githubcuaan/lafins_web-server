@@ -20,7 +20,7 @@ export default function Outcomes() {
 
   // Get filter parameters from URL
   const [searchParams] = useSearchParams();
-  const range = searchParams.get("range");
+  const range = searchParams.get("range") || "day";
   const startDate = searchParams.get("start_date");
   const endDate = searchParams.get("end_date");
   const page = searchParams.get("page");
