@@ -1,6 +1,7 @@
 import BaseModal, { type BaseModalField } from "./BaseModal";
-import { useAuth } from "@/hooks/useAuth";
+import { useJars } from "@/hooks/useJars";
 import type { Jar } from "@/types";
+import { useMemo } from "react";
 // import OutcomeController from '@/actions/App/Http/Controllers/OutcomeController';
 
 type ModalType = "add" | "update";
@@ -27,44 +28,46 @@ export default function OutcomeModal({
   initialData = null,
   onSuccess,
 }: OutcomeModalProps) {
-  const { user } = useAuth();
-  const jars = (user as any)?.jars ?? [];
+  const { jars, isLoading } = useJars();
 
-  const outcomeFields: BaseModalField[] = [
-    {
-      name: "date",
-      label: "Date",
-      type: "date",
-      required: true,
-    },
-    {
-      name: "category",
-      label: "Category",
-      type: "text",
-      required: true,
-    },
-    {
-      name: "jar_id",
-      label: "Jar",
-      type: "select",
-      required: true,
-      options: jars.map((jar: Jar) => ({
-        label: jar.name || jar.key || jar.id.toString(),
-        value: jar.id,
-      })),
-    },
-    {
-      name: "description",
-      label: "Description",
-      type: "textarea",
-    },
-    {
-      name: "amount",
-      label: "Amount",
-      type: "number",
-      required: true,
-    },
-  ];
+  const outcomeFields: BaseModalField[] = useMemo(() => {
+    const jarOptions = jars.map((jar: Jar) => ({
+      label: jar.name || jar.key || jar.id.toString(),
+      value: jar.id,
+    }));
+    return [
+      {
+        name: "date",
+        label: "Date",
+        type: "date",
+        required: true,
+      },
+      {
+        name: "category",
+        label: "Category",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "jar_id",
+        label: "Jar",
+        type: "select",
+        required: true,
+        options: jarOptions,
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+      },
+      {
+        name: "amount",
+        label: "Amount",
+        type: "number",
+        required: true,
+      },
+    ];
+  }, [jars]);
 
   // helper to format currency
   function formatCurrency(amount: number | null | undefined) {
@@ -87,6 +90,11 @@ export default function OutcomeModal({
     data: Record<string, string>,
   ) {
     if (fieldName !== "jar_id") return null;
+
+    if (isLoading) {
+      return <div className="mt-2 text-xs text-gray-400">Loading jars...</div>;
+    }
+
     const selectedId = Number(
       value || data["jar_id"] || initialData?.jar_id || "",
     );
