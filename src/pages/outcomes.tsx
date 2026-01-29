@@ -3,7 +3,7 @@ import AppLayout from "@/layouts/app-layout";
 import type { BreadcrumbItem } from "@/types";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/services/api";
 import AddOutcomeModal from "./outcomes_components/AddOutcomeModal";
 import OutcomeTable from "./outcomes_components/OutcomeTable";
@@ -18,6 +18,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Outcomes() {
   useDocumentTitle("Outcomes");
 
+  const queryClient = useQueryClient();
+  const onSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["outcomes"] });
+  };
   // Get filter parameters from URL
   const [searchParams] = useSearchParams();
   const range = searchParams.get("range") || "day";
@@ -64,6 +68,7 @@ export default function Outcomes() {
           ]}
           defaultSortBy="date"
           defaultSortDir="desc"
+          onSuccess={onSuccess}
         />
         <OutcomeTable
           outcomes={data}

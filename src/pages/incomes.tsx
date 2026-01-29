@@ -6,9 +6,9 @@ import FSbox from "../components/FSbox";
 import AddIncomeModal from "./incomes_components/addModal";
 import IncomesTable from "./incomes_components/IncomesTable";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import api from "@/services/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -19,6 +19,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Incomes() {
   useDocumentTitle("Incomes");
+
+  const queryClient = useQueryClient();
+  const onSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["incomes"] });
+  };
 
   // Get filter parameters from URL
   const [searchParams] = useSearchParams();
@@ -79,6 +84,7 @@ export default function Incomes() {
             ]}
             defaultSortBy="date"
             defaultSortDir="desc"
+            onSuccess={onSuccess}
           />
           <IncomesTable
             incomes={data}
