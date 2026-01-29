@@ -63,7 +63,7 @@ export default function OutcomeModal({
       {
         name: "amount",
         label: "Amount",
-        type: "number",
+        type: "currency",
         required: true,
       },
     ];

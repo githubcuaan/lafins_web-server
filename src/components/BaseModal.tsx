@@ -9,6 +9,7 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import api from "@/services/api";
+import { formatMoney, parseMoney } from "@/lib/utils";
 
 type ModalType = "add" | "update";
 
@@ -16,7 +17,7 @@ type ModalType = "add" | "update";
 export interface BaseModalField {
   name: string;
   label: string;
-  type: "text" | "date" | "number" | "textarea" | "select";
+  type: "text" | "date" | "number" | "textarea" | "select" | "currency";
   placeholder?: string;
   options?: Array<{ label: string; value: string | number }>;
   required?: boolean;
@@ -85,7 +86,12 @@ export default function BaseModal({
     if (initialData) {
       fields.forEach((field) => {
         const value = initialData[field.name];
-        nextData[field.name] = value != null ? String(value) : "";
+        if (field.type === "currency" && value != null) {
+          // Format currency values for display
+          nextData[field.name] = formatMoney(String(value));
+        } else {
+          nextData[field.name] = value != null ? String(value) : "";
+        }
       });
     } else if (type === "add") {
       // reset to initial then set any date fields to today
@@ -113,7 +119,14 @@ export default function BaseModal({
     >,
   ) {
     const { name, value } = e.target;
-    setData(name as keyof typeof data, value);
+    const field = fields.find((f) => f.name === name);
+
+    if (field?.type === "currency") {
+      // Auto-format currency as user types
+      setData(name as keyof typeof data, formatMoney(value));
+    } else {
+      setData(name as keyof typeof data, value);
+    }
   }
 
   // Handle submit
@@ -122,11 +135,14 @@ export default function BaseModal({
     setProcessing(true);
     setErrors({});
 
-    // Normalize number fields
+    // Normalize number and currency fields
     const submitData = { ...data };
     fields.forEach((field) => {
       if (field.type === "number") {
         submitData[field.name] = String(Number(data[field.name]) || 0);
+      } else if (field.type === "currency") {
+        // Parse "10.000" → "10000" before sending to API
+        submitData[field.name] = parseMoney(data[field.name] || "0");
       }
     });
 
@@ -176,7 +192,7 @@ export default function BaseModal({
                   value={data[field.name] || ""}
                   onChange={handleChange}
                   placeholder={field.placeholder}
-                  className="w-full rounded-md border px-3 py-2 min-h-[80px]"
+                  className="w-full rounded-md border px-3 py-2 min-h-20"
                   required={field.required}
                 />
               ) : field.type === "select" ? (

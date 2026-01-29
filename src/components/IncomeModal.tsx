@@ -38,7 +38,7 @@ const incomeFields: BaseModalField[] = [
   {
     name: "amount",
     label: "Amount",
-    type: "number",
+    type: "currency",
     required: true,
   },
 ];
