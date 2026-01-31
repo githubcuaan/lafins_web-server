@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
         element: <PasswordSettings />,
       },
       {
-        path: "/settings/two-factor",
+        path: "/settings/2fa",
         element: <TwoFactorSettings />,
       },
       {
