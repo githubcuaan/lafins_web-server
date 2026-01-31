@@ -1,10 +1,16 @@
 import { authService } from "@/services/auth";
-import type { AuthError, LoginCredentials, RegisterData, User } from "@/types";
+import type {
+  AuthError,
+  LoginCredentials,
+  LoginResponse,
+  RegisterData,
+  User,
+} from "@/types";
 import { type ReactNode, createContext, useEffect, useState } from "react";
 
 interface AuthContextType {
   user: User | null;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<LoginResponse>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -44,8 +50,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (credentials: LoginCredentials) => {
     setError(null);
     try {
-      await authService.login(credentials);
-      await checkAuth();
+      const loginRes = await authService.login(credentials);
+      if (loginRes.data.token) {
+        await checkAuth();
+      }
+
+      return loginRes;
     } catch (err) {
       const axiosError = err as { response?: { data?: AuthError } };
       setError({
@@ -90,7 +100,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, register, logout, isLoading, error, checkAuth, appName: 'Lafins' }}
+      value={{
+        user,
+        login,
+        register,
+        logout,
+        isLoading,
+        error,
+        checkAuth,
+        appName: "Lafins",
+      }}
     >
       {children}
     </AuthContext.Provider>

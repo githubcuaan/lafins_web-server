@@ -1,9 +1,12 @@
+import { password } from "@/routes";
 import api from "./api";
 import type {
   ApiResponse,
   LoginCredentials,
+  LoginResponse,
   RegisterData,
   ResetPasswordData,
+  twoFactorChallengeResponse,
   UpdatePasswordData,
   UpdateProfileData,
   User,
@@ -11,29 +14,68 @@ import type {
 
 export const authService = {
   // 1. CSRF Handshake
-  getCsrfCookie: async () => {
-    await api.get("/sanctum/csrf-cookie", {
-      baseURL: import.meta.env.VITE_API_URL?.replace("/api", "") || "/",
-    });
-  },
+  // getCsrfCookie: async () => { await api.get("/sanctum/csrf-cookie", { baseURL: import.meta.env.VITE_API_URL?.replace("/api", "") || "/", }); },
 
-  // 2. Login
+  // ----- AUTHENTICATION (Login / Register / Logout) -----
+
+  // Login
   login: async (credentials: LoginCredentials) => {
-    await authService.getCsrfCookie(); // allway get cookie first
-    const response = await api.post("/login", credentials);
+    const response = await api.post<ApiResponse<LoginResponse>>("/login", {
+      ...credentials,
+      device_name: navigator.userAgent,
+    });
+
+    // if backend serve token -> no 2fa
+    if (response.data.data.token) {
+      localStorage.setItem("auth_token", response.data.data.token);
+    }
+
+    // if dont -> enabled 2fa
     return response.data;
   },
 
-  // 3. Register
+  // twoFactorChallenge
+  twoFactorChallenge: async (code: string, tempToken: string) => {
+    const response = await api.post<ApiResponse<twoFactorChallengeResponse>>(
+      "/two-factor-challenge",
+      { code, device_name: navigator.userAgent },
+      {
+        headers: {
+          Authorization: `Bearer ${tempToken}`,
+        },
+      },
+    );
+
+    const token = response.data.data.token;
+
+    if (token) {
+      localStorage.setItem("auth_token", token);
+    }
+
+    return response.data;
+  },
+
+  //  Register
   register: async (data: RegisterData) => {
-    await authService.getCsrfCookie();
-    const response = await api.post("/register", data);
+    const response = await api.post("/register", {
+      ...data,
+      device_name: navigator.userAgent,
+    });
+
+    if (response.data.data.token) {
+      localStorage.setItem("auth_token", response.data.data.token);
+    }
+
     return response.data;
   },
 
   // 4. Logout
   logout: async () => {
-    await api.post("logout");
+    try {
+      await api.post("logout");
+    } finally {
+      localStorage.removeItem("auth_token");
+    }
   },
 
   // 5. Get current user
@@ -41,6 +83,8 @@ export const authService = {
     const response = await api.get<ApiResponse<{ user: User }>>("/user");
     return response.data.data.user;
   },
+
+  // ----- PASSWORD MANAGEMENT -----
 
   // 6. Forgot Password
   forgotPassword: async (email: string) => {
@@ -82,7 +126,19 @@ export const authService = {
 
   // 4. disable 2FA
   disable2FA: async () => {
-    const response = await api.delete("/settings/2fa/disable");
+    const response = await api.delete("/settings/2fa/disable", {
+      data: { password },
+    });
+    return response.data;
+  },
+
+  getRecoveryCodes: async (data: { password: string }) => {
+    const response = await api.post("/settings/2fa/recovery-codes/show", data);
+    return response.data;
+  },
+
+  regenerateRecoveryCodes: async (data: { password: string }) => {
+    const response = await api.post("/settings/2fa/recovery-codes", data);
     return response.data;
   },
 

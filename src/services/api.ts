@@ -4,8 +4,8 @@ const api = axios.create({
   // Use proxy in dev, explicit URL in production
   baseURL: import.meta.env.VITE_API_URL || "/api",
 
-  // Quan trọng: Gửi kèm Cookie/Session
-  withCredentials: true,
+  // token-based
+  withCredentials: false,
 
   headers: {
     "Content-Type": "application/json",
@@ -15,14 +15,11 @@ const api = axios.create({
 
 // Interceptor để tự động thêm CSRF token vào header
 api.interceptors.request.use((config) => {
-  // Lấy CSRF token từ cookie
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("XSRF-TOKEN="))
-    ?.split("=")[1];
+  // get token from localStorage
+  const token = localStorage.getItem("auth_token");
 
   if (token) {
-    config.headers["X-XSRF-TOKEN"] = decodeURIComponent(token);
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
@@ -37,6 +34,7 @@ api.interceptors.response.use(
     if (response && response.status === 401) {
       // Xóa thông tin user ở client nếu cần
       // window.location.href = '/login';
+      localStorage.removeItem("auth_token");
     }
 
     return Promise.reject(error);

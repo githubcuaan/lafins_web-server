@@ -1,3 +1,5 @@
+import type { User } from "./models";
+
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -35,4 +37,21 @@ export interface UpdateProfileData {
 export interface AuthError {
   message: string;
   errors?: Record<string, string[]>; // {email: ['email is lolololol']}
+}
+
+export interface LoginResponse {
+  user: User;
+
+  // no 2fa
+  token?: string;
+
+  // 2fa
+  temp_token?: string;
+  enabled_2fa?: boolean;
+  expires_in?: number;
+}
+
+export interface twoFactorChallengeResponse {
+  user: User;
+  token: string;
 }

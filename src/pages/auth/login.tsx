@@ -30,9 +30,20 @@ export default function Login() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login({ email: data.email, password: data.password });
+      const res = await login({
+        email: data.email,
+        password: data.password,
+        remember: data.remember,
+      });
+
+      if (res.enabled_2fa) {
+        navigate("/two-factor-challenge");
+      } else if (res.token) {
+        navigate("/dashboard");
+      }
     } catch (err) {
       // Lỗi đã được xử lý trong AuthContext
+      console.error("Err in Login.tsx: ", err);
     }
   };
 
