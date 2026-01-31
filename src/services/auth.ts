@@ -7,6 +7,8 @@ import type {
   RegisterData,
   ResetPasswordData,
   twoFactorChallengeResponse,
+  TwoFactorSecretKey,
+  TwoFactorSetupData,
   UpdatePasswordData,
   UpdateProfileData,
   User,
@@ -129,6 +131,16 @@ export const authService = {
     const response = await api.delete("/settings/2fa/disable", {
       data: { password },
     });
+    return response.data;
+  },
+
+  showQrCode: async (): Promise<TwoFactorSetupData> => {
+    const response = await api.get("/settings/2fa/qr-code");
+    return response.data;
+  },
+
+  showSecretKey: async (): Promise<TwoFactorSecretKey> => {
+    const response = await api.get("/settings/2fa/secret-key");
     return response.data;
   },
 
