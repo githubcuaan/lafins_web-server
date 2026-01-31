@@ -2,42 +2,42 @@
 // These match the Laravel Ziggy-style route helpers
 
 // Auth routes
-export const login = () => '/login';
-export const register = () => '/register';
-export const logout = () => '/logout';
+export const login = () => "/login";
+export const register = () => "/register";
+export const logout = () => "/logout";
 
 // Dashboard
-export const dashboard = () => '/dashboard';
+export const dashboard = () => "/dashboard";
 
 // Profile routes
 export const profile = {
-  edit: () => '/settings/profile',
+  edit: () => "/settings/profile",
 };
 
 // Settings routes
 export const password = {
-  edit: () => '/settings/password',
+  edit: () => "/settings/password",
 };
 
 export const appearance = {
-  edit: () => '/settings/appearance',
+  edit: () => "/settings/appearance",
 };
 
 // Two-factor routes
 export const twoFactor = {
-  show: () => '/settings/two-factor',
-  enable: () => '/settings/two-factor/enable',
-  confirm: () => '/settings/two-factor/confirm',
-  disable: () => '/settings/two-factor/disable',
+  show: () => "/settings/2fa",
+  enable: () => "/settings/2fa/enable",
+  confirm: () => "/settings/2fa/confirm",
+  disable: () => "/settings/2fa/disable",
 };
 
 // Verification
 export const verification = {
-  send: () => '/email/verification-notification',
+  send: () => "/email/verification-notification",
 };
 
 // Home
-export const home = () => '/';
+export const home = () => "/";
 
 // Shorthand exports
 export const edit = profile.edit;
